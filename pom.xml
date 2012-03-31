@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.linkage</groupId>
+  <artifactId>netty-redis</artifactId>
+  <version>0.10</version>
+
+  <packaging>jar</packaging>
+
+  <name>netty-redis</name>
+  <description>Java redis client,based netty</description>
+  <url>http://github.com/rogerliubin/netty-redis</url>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>Roger</id>
+      <name>Roger Liu</name>
+    </developer>
+  </developers>
+
+  <dependencies>
+   <dependency>
+     <groupId>org.jboss.netty</groupId>
+     <artifactId>netty</artifactId>
+     <version>[3.2.4.Final,3.3.0.Final)</version>
+   </dependency>
+
+   <dependency>
+     <groupId>junit</groupId>
+     <artifactId>junit</artifactId>
+     <version>4.8.2</version>
+     <scope>test</scope>
+   </dependency>
+  </dependencies>
+
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+
+
+
+  <repositories>
+    <repository>
+      <id>repository.jboss.org</id>
+      <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+    </repository>
+  </repositories>
+</project>
