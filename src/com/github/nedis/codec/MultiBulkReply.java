@@ -15,6 +15,10 @@ public class MultiBulkReply extends Reply<Object[]> {
         super(MARKER, value);
     }
 
+    public MultiBulkReply(int size) {
+
+        this.size = size;
+    }
     public void read(RedisDecoder rd, ChannelBuffer is) {
         if (size == -1) {
             byte star = is.readByte();

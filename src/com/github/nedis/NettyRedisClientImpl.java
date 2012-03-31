@@ -69,11 +69,36 @@ public class NettyRedisClientImpl implements RedisClient {
         channel.write(new Command(CommandType.PING,  null));
     }
 
+    public void set(String key, String value) {
+        Command set = new Command(CommandType.SET, new CommandArgs().addKey(key).addValue(value));
+        channel.write(set);
+    }
+
+    public void setSafeBinary(String key, byte[] value) {
+
+    }
+
+    public String get(String key) {
+        Command cmd = new Command(CommandType.GET, new CommandArgs().addKey(key));
+        channel.write(cmd);
+        try {
+            cmd.waitForResult();
+            BulkReply bulkReply = (BulkReply)cmd.getOutput();
+            return bulkReply.getString();
+        }catch(InterruptedException e) {
+            return null;
+        }
+
+    }
+
+    public byte[] getSafeBinary(String key) {
+        return new byte[0];
+    }
+
     public static void main(String[] args) {
-        RedisClient redis = new NettyRedisClientImpl("localhost");
-        redis.ping();
-
-
+        final RedisClient redis = new NettyRedisClientImpl("localhost");
+        redis.set("name", "chenxy");
+        System.out.println(redis.get("name"));
 
     }
 }

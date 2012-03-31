@@ -9,4 +9,12 @@ public class IntegerReply extends Reply<Integer> {
     public IntegerReply(int value) {
         super(MARKER, value);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("integer reply").append(value);
+        return sb.toString();
+    }
+
 }

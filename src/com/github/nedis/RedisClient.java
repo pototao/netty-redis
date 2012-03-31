@@ -9,7 +9,13 @@ package com.github.nedis;
 public interface RedisClient {
     public void ping();
 
+    public void set(String key, String value);
+    
+    public void setSafeBinary(String key, byte[] value);
 
+    public String get(String key);
+    
+    public byte[] getSafeBinary(String key);
 
 
 

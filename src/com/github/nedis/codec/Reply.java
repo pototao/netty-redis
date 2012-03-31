@@ -9,6 +9,7 @@ public class Reply<T> {
     protected String error;
     protected char marker;
 
+    public Reply() {}
     public Reply(char marker, T value) {
         this.marker = marker;
         this.value = value;

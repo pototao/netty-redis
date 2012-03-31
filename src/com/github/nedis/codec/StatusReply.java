@@ -9,4 +9,10 @@ public class StatusReply extends Reply<String> {
     public StatusReply(String value) {
         super(MARKER, value);
     }
+    
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("status reply:").append(value);
+        return sb.toString();
+    }
 }

@@ -9,4 +9,14 @@ public class BulkReply extends Reply<byte[]> {
     public BulkReply(byte[] value) {
         super(MARKER, value);
     }
+
+    public String getString() {
+        return new String(value);
+    }
+    
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(value);
+        return sb.toString();
+    }
 }

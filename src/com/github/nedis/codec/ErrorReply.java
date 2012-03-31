@@ -9,4 +9,11 @@ public class ErrorReply extends  Reply<String> {
     public ErrorReply(String error) {
         super(MARKER, error);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("error reply").append(value);
+        return sb.toString();
+    }
 }

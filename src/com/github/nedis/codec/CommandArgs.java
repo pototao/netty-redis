@@ -16,26 +16,31 @@ public class CommandArgs {
         this.buffer = ChannelBuffers.dynamicBuffer();
     }
 
-    public void addKey(String key) {
+    public CommandArgs addKey(String key) {
         write(key.getBytes());
+        return this;
     }
 
-    public void addKeys(String...keys) {
+    public CommandArgs addKeys(String...keys) {
         for(String key : keys) {
             write(key.getBytes());
         }
+        return this;
     }
 
-    public void addCommandType(CommandType commandType) {
+    public CommandArgs addCommandType(CommandType commandType) {
         write(commandType.value);
+        return this;
     }
 
-    public void addValue(String value) {
+    public CommandArgs addValue(String value) {
         write(value.getBytes());
+        return  this;
     }
 
-    public void addValue(byte[] bytes) {
+    public CommandArgs addValue(byte[] bytes) {
         write(bytes);
+        return this;
     }
 
     private void write(byte[] bytes) {

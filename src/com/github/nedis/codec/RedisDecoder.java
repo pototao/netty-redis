@@ -16,6 +16,8 @@ import java.util.LinkedList;
  * Date: 12-3-15 11:11
  */
 public class RedisDecoder extends ReplayingDecoder {
+
+
     private static final byte CR = 13;
     private static final byte LF = 10;
     private static final char ZERO = '0';
@@ -41,6 +43,7 @@ public class RedisDecoder extends ReplayingDecoder {
         byte marker = buffer.readByte();
         switch (marker) {
             case StatusReply.MARKER: {
+
                 return new StatusReply(readLine(buffer));
             }
             case ErrorReply.MARKER: {

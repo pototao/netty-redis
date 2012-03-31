@@ -19,6 +19,7 @@ public class Command {
     private CommandArgs commandArgs;
     private ChannelBuffer buffer;
 
+    private Reply reply;
     public Command(CommandType type, CommandArgs commandArgs) {
         this.commandType = type;
 
@@ -57,5 +58,27 @@ public class Command {
         buffer.writeBytes(String.valueOf(length).getBytes());
     }
 
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(commandType.name());
+        return sb.toString();
+    }
+
+
+    public void setReply(Reply reply) {
+        this.reply = reply;
+    }
+    
+    public Reply getOutput() {
+
+        return reply;
+    }
+
+
+    public void waitForResult() throws InterruptedException {
+        latch.await();
+
+    }
 
 }
