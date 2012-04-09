@@ -12,7 +12,10 @@ import org.jboss.netty.util.HashedWheelTimer;
 import org.jboss.netty.util.Timer;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -29,6 +32,22 @@ public class NettyRedisClientImpl implements RedisClient {
     private String host;
     private int port;
     private ChannelPipeline pipeline;
+
+    private long timeout;
+
+    private TimeUnit unit;
+
+    private boolean pipelineMode;
+
+    private List<Command> pipelineCommands = new ArrayList<Command>();
+
+    public void startPipeline() {
+        pipelineMode = true;
+    }
+
+    public void endPipeline() {
+        pipelineMode = false;
+    }
 
     public NettyRedisClientImpl(String host) {
         this("localhost", 6379);
@@ -55,6 +74,8 @@ public class NettyRedisClientImpl implements RedisClient {
         ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port));
         channel = future.awaitUninterruptibly().getChannel();
 
+        timeout = 60;
+        unit = TimeUnit.SECONDS;
 
     }
 
@@ -65,8 +86,13 @@ public class NettyRedisClientImpl implements RedisClient {
         channel = future.awaitUninterruptibly().getChannel();
     }
 
-    public void ping() {
-        channel.write(new Command(CommandType.PING,  null));
+    public String ping() {
+        Command command = new Command(CommandType.PING,  null);
+        channel.write(command);
+
+        Reply reply = getReply(command);
+        return reply == null ? null : ((StatusReply)reply).get();
+
     }
 
     public void set(String key, String value) {
@@ -81,24 +107,50 @@ public class NettyRedisClientImpl implements RedisClient {
     public String get(String key) {
         Command cmd = new Command(CommandType.GET, new CommandArgs().addKey(key));
         channel.write(cmd);
-        try {
-            cmd.waitForResult();
-            BulkReply bulkReply = (BulkReply)cmd.getOutput();
-            return bulkReply.getString();
-        }catch(InterruptedException e) {
-            return null;
-        }
+
+        Reply reply =  getReply(cmd);
+
+        return reply == null ? null : ((BulkReply)reply).getString();
 
     }
 
+
+    private Reply getReply(Command cmd) {
+        if(pipelineMode) {
+            pipelineCommands.add(cmd);
+            return null;
+        }
+        if (!cmd.await(timeout, unit)) {
+            cmd.cancel(true);
+            throw new RedisException("Command timed out");
+        }
+        Reply reply =  cmd.getOutput();
+        if(reply instanceof  ErrorReply) throw new RedisException(((ErrorReply)reply).get());
+
+        return reply;
+    }
     public byte[] getSafeBinary(String key) {
         return new byte[0];
     }
 
     public static void main(String[] args) {
         final RedisClient redis = new NettyRedisClientImpl("localhost");
-        redis.set("name", "chenxy");
-        System.out.println(redis.get("name"));
+        long tick = System.currentTimeMillis();
+        for(int i = 0;i < 10000; i++) {
+            redis.ping();
+        }
+
+        System.out.println("10000 ping cost : " + (System.currentTimeMillis() - tick) + " ms");
+
+        redis.startPipeline();
+        tick = System.currentTimeMillis();
+        for(int i = 0;i < 10000; i++) {
+            redis.ping();
+        }
+        redis.endPipeline();
+        System.out.println("in pipeline mode,10000 ping cost : " + (System.currentTimeMillis() - tick) + " ms");
+
+
 
     }
 }

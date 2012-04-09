@@ -29,13 +29,14 @@ public class RedisClientHandler extends SimpleChannelHandler {
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws java.lang.Exception {
+
         Reply reply = (Reply)e.getMessage();
 
         Command command = queue.take();
         command.setReply(reply);
         command.complete();
 
-        logger.info("command:" + command + ",return " + reply);
+        //logger.info("command:" + command + ",return " + reply);
     }
 
 }

@@ -1,10 +1,12 @@
 package com.github.nedis.codec;
 
+import com.github.nedis.RedisCommandInterruptedException;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channels;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * User: roger
@@ -76,9 +78,25 @@ public class Command {
     }
 
 
-    public void waitForResult() throws InterruptedException {
-        latch.await();
+    public boolean await(long timeout, TimeUnit unit) {
+        try {
+            return latch.await(timeout, unit);
+        } catch (InterruptedException e) {
+            throw new RedisCommandInterruptedException(e);
+        }
+    }
 
+
+
+
+    public boolean cancel(boolean ignored) {
+        boolean cancelled = false;
+        if (latch.getCount() == 1) {
+            latch.countDown();
+            reply = null;
+            cancelled = true;
+        }
+        return cancelled;
     }
 
 }

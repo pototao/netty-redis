@@ -7,7 +7,7 @@ package com.github.nedis;
  */
 
 public interface RedisClient {
-    public void ping();
+    public String ping();
 
     public void set(String key, String value);
     
@@ -17,6 +17,8 @@ public interface RedisClient {
     
     public byte[] getSafeBinary(String key);
 
+    public void startPipeline();
 
+    public void endPipeline();
 
 }
