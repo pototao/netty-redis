@@ -1,6 +1,8 @@
 package com.github.nedis;
 
 import com.github.nedis.codec.*;
+import com.github.nedis.pubsub.PubSubHandler;
+import com.github.nedis.pubsub.RedisListener;
 import com.sun.xml.internal.ws.api.pipe.PipelineAssembler;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.*;
@@ -14,6 +16,7 @@ import org.jboss.netty.util.Timer;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -41,6 +44,8 @@ public class NettyRedisClientImpl implements RedisClient {
 
     private List<Command> pipelineCommands = new ArrayList<Command>();
 
+    private List<RedisListener> listeners = new CopyOnWriteArrayList<RedisListener>();
+
     public void startPipeline() {
         pipelineMode = true;
     }
@@ -67,6 +72,7 @@ public class NettyRedisClientImpl implements RedisClient {
 
         ClientSocketChannelFactory factory =  new  NioClientSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
         bootstrap = new ClientBootstrap(factory);
+
         pipeline = Channels.pipeline(new AutoReconnectHandler(this, channels, timer), new RedisDecoder(), new RedisClientHandler());
 
         bootstrap.setPipeline(pipeline);
@@ -133,23 +139,62 @@ public class NettyRedisClientImpl implements RedisClient {
         return new byte[0];
     }
 
-    public static void main(String[] args) {
+    public void addListener(RedisListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(RedisListener listener) {
+        listeners.remove(listener);
+    }
+
+    public synchronized void subscribe(String... channels) {
+        ChannelHandler handler = channel.getPipeline().getLast();
+
+        if(handler instanceof RedisClientHandler) {
+            channel.getPipeline().replace(RedisClientHandler.class, "pubsub", new PubSubHandler(listeners));
+        }
+
+        Command cmd = new Command(CommandType.SUBSCRIBE, args(channels));
+        channel.write(cmd);
+
+    }
+
+    public void publish(String pchannel, String message) {
+        ChannelHandler handler = channel.getPipeline().getLast();
+
+        if(handler instanceof RedisClientHandler) {
+            channel.getPipeline().replace(RedisClientHandler.class, "pubsub", new PubSubHandler(listeners));
+        }
+
+        Command cmd = new Command(CommandType.PUBLISH, new CommandArgs().add(pchannel).addValue(message));
+        channel.write(cmd);
+
+    }
+
+    private CommandArgs args(String... strings) {
+        CommandArgs args = new CommandArgs();
+        for (String c : strings) {
+            args.add(c);
+        }
+        return args;
+    }
+
+    public static void main(String[] args) throws  Exception {
         final RedisClient redis = new NettyRedisClientImpl("localhost");
-        long tick = System.currentTimeMillis();
-        for(int i = 0;i < 10000; i++) {
-            redis.ping();
-        }
+        redis.subscribe("mq1");
+        redis.addListener(new RedisListener() {
+            @Override
+            public void message(String channel, String message) {
+                System.out.println("on channel " + channel +", receive message : " + message);
+            }
 
-        System.out.println("10000 ping cost : " + (System.currentTimeMillis() - tick) + " ms");
+            @Override
+            public void message(String pattern, String channel, String message) {
 
-        redis.startPipeline();
-        tick = System.currentTimeMillis();
-        for(int i = 0;i < 10000; i++) {
-            redis.ping();
-        }
-        redis.endPipeline();
-        System.out.println("in pipeline mode,10000 ping cost : " + (System.currentTimeMillis() - tick) + " ms");
-
+            }
+        });
+        final RedisClient rr = new NettyRedisClientImpl("localhost");
+        rr.publish("mq1", "你是谁啊");
 
 
     }

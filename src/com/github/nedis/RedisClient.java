@@ -1,6 +1,8 @@
 package com.github.nedis;
 
 
+import com.github.nedis.pubsub.RedisListener;
+
 /**
  * User: roger
  * Date: 12-3-7 9:43
@@ -21,4 +23,8 @@ public interface RedisClient {
 
     public void endPipeline();
 
+
+    public void subscribe(String... channels);
+    public void addListener(RedisListener listener);
+    public void publish(String channel, String message);
 }

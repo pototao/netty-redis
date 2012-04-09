@@ -21,6 +21,11 @@ public class CommandArgs {
         return this;
     }
 
+    public CommandArgs add(String v) {
+        write(v.getBytes());
+        return this;
+    }
+
     public CommandArgs addKeys(String...keys) {
         for(String key : keys) {
             write(key.getBytes());

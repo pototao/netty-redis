@@ -49,4 +49,19 @@ public class MultiBulkReply extends Reply<Object[]> {
             rd.checkpoint();
         }
     }
+
+
+    public String toString() {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(super.toString()).append(" multi reply : ");
+        for(int i = 0;i < size; i++) {
+            if(value[i] instanceof byte[]) {
+                sb.append(new String((byte[])value[i])).append(" ");
+            } else {
+                sb.append(value[i]);
+            }
+        }
+        return sb.toString();
+    }
 }

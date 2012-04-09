@@ -50,6 +50,7 @@ public class AutoReconnectHandler extends SimpleChannelUpstreamHandler implement
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+        logger.fine("exception : " + e);
         ctx.getChannel().close();
     }
 

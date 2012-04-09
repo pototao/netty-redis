@@ -32,14 +32,16 @@ public class RedisDecoder extends ReplayingDecoder {
 
 
     @Override
+
     protected Object decode(ChannelHandlerContext channelHandlerContext, Channel channel, ChannelBuffer buffer, Enum anEnum) throws Exception {
         if(multiReply != null) {
+
             multiReply.read(this, buffer);
+
             Reply ret = multiReply;
             multiReply = null;
             return ret;
         }
-
         byte marker = buffer.readByte();
         switch (marker) {
             case StatusReply.MARKER: {
@@ -130,7 +132,10 @@ public class RedisDecoder extends ReplayingDecoder {
             multiReply = new MultiBulkReply();
         }
         multiReply.read(this, is);
-        return multiReply;
+
+        MultiBulkReply ret = multiReply;
+        multiReply = null;
+        return ret;
     }
 
 
